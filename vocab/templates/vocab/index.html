@@ -1,0 +1,80 @@
+{% load static %}
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GRE 单词背诵</title>
+  <link rel="stylesheet" href="{% static 'vocab/styles.css' %}" />
+</head>
+<body data-username="{{ request.user.username|escape }}">
+  <main class="shell">
+    <section class="hero">
+      <div>
+        <p class="eyebrow">GRE 1500 · List Trainer</p>
+        <h1>Fight GRE</h1>
+        <p class="sub">可多选 List 混合背诵；↑ 显示答案，← 没记住，→ 记住。没记住的词会在下一轮随机复现。</p>
+      </div>
+      <div class="account-panel">
+        <div class="account-row">
+          <span>当前用户：<strong>{{ request.user.username }}</strong></span>
+          <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="ghost compact">退出登录</button>
+          </form>
+        </div>
+        <div class="stats" id="stats"></div>
+      </div>
+    </section>
+
+    <section class="controls card">
+      <label>List（可多选）
+        <select id="listSelect" multiple size="6"></select>
+      </label>
+      <div class="mini-actions">
+        <button id="selectAllBtn" type="button" class="ghost">全选</button>
+        <button id="clearListsBtn" type="button" class="ghost">清空</button>
+      </div>
+      <label>出现方式
+        <select id="orderMode">
+          <option value="ordered">正序</option>
+          <option value="random">乱序</option>
+          <option value="similar">近义词一起出现</option>
+        </select>
+      </label>
+      <button id="startBtn">开始</button>
+      <button id="resetBtn" class="ghost">清空进度</button>
+    </section>
+
+    <section class="study card">
+      <div class="queue" id="queueInfo">正在载入进度。</div>
+      <article class="word-card" id="wordCard">
+        <button id="fullscreenBtn" class="fullscreen-btn" type="button" aria-label="进入全屏">⛶</button>
+        <div class="badge" id="badge">List</div>
+        <h2 id="word">GRE</h2>
+        <p class="sentence" id="sentence">复习时先看英文句子，猜词义，再翻答案。</p>
+        <div class="answer hidden" id="answer">
+          <p><strong>中文：</strong><span id="cn"></span></p>
+          <p><strong>英文考法：</strong><span id="en"></span></p>
+          <p><strong>辨析提示：</strong><span id="studyTip"></span></p>
+          <div id="similar" class="similar"></div>
+          <div id="online" class="online"></div>
+        </div>
+        <p class="gesture-hint">全屏：点一下显示答案 · 左滑没记住 · 右滑记住</p>
+      </article>
+      <div class="actions">
+        <button id="showBtn">↑ 答案</button>
+        <button data-grade="again" class="danger">← 没记住</button>
+        <button data-grade="good">→ 记住</button>
+      </div>
+    </section>
+
+    <section class="card dashboard">
+      <h3>List 进度</h3>
+      <div id="listReview"></div>
+    </section>
+  </main>
+  <script src="{% static 'vocab/data/words.js' %}"></script>
+  <script src="{% static 'vocab/app.js' %}"></script>
+</body>
+</html>

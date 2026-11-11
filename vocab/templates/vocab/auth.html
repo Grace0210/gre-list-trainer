@@ -1,0 +1,48 @@
+{% load static %}
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>登录 · GRE 单词背诵</title>
+  <link rel="stylesheet" href="{% static 'vocab/styles.css' %}" />
+</head>
+<body class="auth-page">
+  <main class="auth-shell">
+    <section class="auth-intro">
+      <p class="eyebrow">GRE 1500 · List Trainer</p>
+      <h1>Fight GRE</h1>
+      <p class="sub">登录后，每个账号的单词进度和 List 背诵次数独立保存。</p>
+    </section>
+
+    {% if error %}<div class="auth-error" role="alert">{{ error }}</div>{% endif %}
+
+    <section class="auth-grid">
+      <form class="card auth-card {% if active_form == 'register' %}muted-card{% endif %}" method="post" action="{% url 'login' %}">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ next }}" />
+        <h2>登录</h2>
+        <label>用户名
+          <input name="username" value="{% if active_form != 'register' %}{{ username }}{% endif %}" autocomplete="username" required autofocus />
+        </label>
+        <label>密码
+          <input name="password" type="password" autocomplete="current-password" required />
+        </label>
+        <button type="submit">登录</button>
+      </form>
+
+      <form class="card auth-card {% if active_form == 'login' %}muted-card{% endif %}" method="post" action="{% url 'register' %}">
+        {% csrf_token %}
+        <h2>注册新账号</h2>
+        <label>用户名
+          <input name="username" value="{% if active_form == 'register' %}{{ username }}{% endif %}" autocomplete="username" maxlength="150" required />
+        </label>
+        <label>密码
+          <input name="password" type="password" autocomplete="new-password" required />
+        </label>
+        <button type="submit">注册并进入</button>
+      </form>
+    </section>
+  </main>
+</body>
+</html>
