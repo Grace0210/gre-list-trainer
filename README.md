@@ -11,7 +11,7 @@ A Django web app for memorising GRE vocabulary list by list, with per-user accou
 - **Spaced repetition loop**: ↑ reveal, ← "missed", → "got it". Missed words reappear at random in the next round, and a list counts as completed once every word in it is marked "got it".
 - **Progress sync**: word-level state (seen / correct / wrong / ease / due) and list completion counts are stored in the database through a small JSON API, with `localStorage` as an offline fallback.
 - **Mobile friendly**: full-screen card with tap to reveal and swipe left/right to grade.
-- **Online examples**: fetches example sentences from the Free Dictionary API when available.
+- **Online examples**: fetches example sentences from the Free Dictionary API when available; external text is rendered with `textContent` only, never `innerHTML`.
 
 ## Tech stack
 
@@ -40,8 +40,10 @@ python3 -m venv .venv
 Open <http://127.0.0.1:8000/> and register an account.
 
 ```bash
-.venv/bin/python manage.py test vocab   # 8 tests: auth, open-redirect guard, per-user isolation
+.venv/bin/python manage.py test vocab   # 10 tests: auth, open-redirect guard, per-user isolation, orphan-row handling
 ```
+
+Progress saved before accounts existed has no owner. An admin can assign it explicitly with `python manage.py claim_orphan_progress <username>`; registration never claims it automatically.
 
 For production set the variables in [`.env.example`](.env.example). The app refuses to start with `DJANGO_DEBUG=0` and no `DJANGO_SECRET_KEY`.
 

@@ -140,9 +140,18 @@ async function next(){
   $('similar').innerHTML=sims.length ? sims.map(w=>`<span class="chip">${w.word}：${normalizeMeaning(w.cn)}</span>`).join('') : '<span class="chip">暂无明显近义簇</span>';
   $('queueInfo').textContent=`${activeListLabel()} · 第 ${passNumber} 轮：已记住 ${masteredThisRound.size} 个，本轮剩余 ${queue.length + 1} 个，下一轮待复现 ${missedThisPass.size} 个。`;
 }
+function renderExamples(examples){
+  // Text from the external dictionary API is inserted with textContent only (no innerHTML) to prevent XSS.
+  const box=$('online'); box.replaceChildren();
+  if(!examples.length){ box.textContent='在线词典没有返回例句；可用上面的 GRE 句子复习。'; return; }
+  const title=document.createElement('strong'); title.textContent='在线例句：';
+  const list=document.createElement('ul');
+  for(const example of examples){ const item=document.createElement('li'); item.textContent=String(example); list.appendChild(item); }
+  box.append(title, list);
+}
 async function fetchExample(){
   if(!current) return; $('online').textContent='正在搜索在线例句…';
-  try { const res=await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(current.word)}`); const data=await res.json(); const defs=(Array.isArray(data)?data:[]).flatMap(x=>x.meanings||[]).flatMap(m=>m.definitions||[]); const examples=defs.map(d=>d.example).filter(Boolean).slice(0,3); $('online').innerHTML=examples.length ? '<strong>在线例句：</strong><ul>'+examples.map(e=>`<li>${e}</li>`).join('')+'</ul>' : '在线词典没有返回例句；可用上面的 GRE 句子复习。'; } catch { $('online').textContent='在线例句暂时拉取失败；离线复习不受影响。'; }
+  try { const res=await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(current.word)}`); const data=await res.json(); const defs=(Array.isArray(data)?data:[]).flatMap(x=>x.meanings||[]).flatMap(m=>m.definitions||[]); const examples=defs.map(d=>d.example).filter(Boolean).slice(0,3); renderExamples(examples); } catch { $('online').textContent='在线例句暂时拉取失败；离线复习不受影响。'; }
 }
 function renderStats(){
   const completedTodayTarget = 6;

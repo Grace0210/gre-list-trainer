@@ -75,8 +75,6 @@ def register_view(request):
     try:
         with transaction.atomic():
             user = User.objects.create_user(username=username, password=password)
-            WordProgress.objects.filter(owner__isnull=True).update(owner=user)
-            ListProgress.objects.filter(owner__isnull=True).update(owner=user)
     except IntegrityError:
         context['error'] = '该用户名已被注册，请换一个。'
         return render(request, 'vocab/auth.html', context, status=409)

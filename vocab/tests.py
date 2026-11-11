@@ -74,3 +74,19 @@ class ProgressIsolationTests(TestCase):
         self.assertEqual(ListProgress.objects.get(owner=self.alice, list_no=1).completed_count, 2)
         self.client.force_login(self.bob)
         self.assertEqual(self.client.get(reverse('list_progress_collection')).json(), {})
+
+
+class OrphanProgressTests(TestCase):
+    def test_registration_does_not_claim_orphan_rows(self):
+        WordProgress.objects.create(owner=None, word_id='old', seen=5)
+        self.client.post(reverse('register'), {'username': 'mallory', 'password': 'pw-123456'})
+        self.assertIsNone(WordProgress.objects.get(word_id='old').owner)
+
+    def test_claim_command_assigns_orphans_to_named_user(self):
+        from django.core.management import call_command
+        user = User.objects.create_user('grace', password='x')
+        WordProgress.objects.create(owner=None, word_id='old', seen=5)
+        ListProgress.objects.create(owner=None, list_no=1, completed_count=2)
+        call_command('claim_orphan_progress', 'grace', stdout=open('/dev/null', 'w'))
+        self.assertEqual(WordProgress.objects.get(word_id='old').owner, user)
+        self.assertEqual(ListProgress.objects.get(list_no=1).owner, user)
